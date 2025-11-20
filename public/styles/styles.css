@@ -1,0 +1,77 @@
+:root {
+    --background: #121212;
+    --secondary-background: #161616;
+    
+    --main-background: #1F1F1F;
+
+    --font: #EEEEEE;
+
+    --primary-color: #A8DADC;
+    --secondary-color: #FFC1CC;
+    --terciary-color: #B39CD0;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    color: var(--font);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 18px;
+}
+
+body {
+    background-color: var(--main-background);
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: var(--background);
+    padding: 2em;
+    box-shadow: 0px 25px 25px 0px rgba(21,21,21,0.51);
+}
+
+nav {
+    background-color: var(--secondary-background);
+    width: 100%;
+    height: fit-content;
+    padding-top: 1%;
+}
+
+.tab_navigation {
+    list-style: none;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: end;
+    gap: .01em;
+}
+
+.tab_navigation li {
+    padding: .5em 1em;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: -1px;
+}
+
+.tab_navigation li#selected {
+    background-color: var(--main-background);
+    border-bottom: 1px solid var(--primary-color);
+    transition: 0.2s ease-in-out;
+
+}
+
+.tab_navigation li:hover {
+    background-color: var(--main-background);
+}
+
+main {
+    flex-grow: 3;
+    display: flex;
+    overflow-y: auto;
+    padding: 2em;
+}
