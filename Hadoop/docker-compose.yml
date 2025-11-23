@@ -1,6 +1,7 @@
-version: '3.8'
-
 services:
+  # ==========================
+  # HADOOP NAMENODE
+  # ==========================
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
@@ -11,11 +12,14 @@ services:
       - CLUSTER_NAME=demo
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
     ports:
-      - "9870:9870"
-      - "9000:9000"
+      - "9870:9870"   # Hadoop NameNode UI
+      - "9000:9000"   # HDFS port
     networks:
       - hadoop
 
+  # ==========================
+  # HADOOP DATANODE
+  # ==========================
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode
@@ -28,11 +32,60 @@ services:
       - CORE_CONF_hadoop_http_staticuser_user=root
       - HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check=false
     ports:
-      - "9864:9864"
+      - "9864:9864"   # DataNode UI
     networks:
       - hadoop
     depends_on:
       - namenode
+
+  # ==========================
+  # SPARK MASTER (LATEST)
+  # ==========================
+  spark-master:
+    image: bde2020/spark-master:latest
+    container_name: spark-master
+    hostname: spark-master
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+    ports:
+      - "8080:8080"   # Spark Master UI
+      - "7077:7077"   # Spark master port
+    networks:
+      - hadoop
+    depends_on:
+      - namenode
+      - datanode
+
+  # ==========================
+  # SPARK WORKER (LATEST)
+  # ==========================
+  spark-worker:
+    image: bde2020/spark-worker:latest
+    container_name: spark-worker
+    hostname: spark-worker
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    networks:
+      - hadoop
+    depends_on:
+      - spark-master
+
+  # ==========================
+  # SPARK SUBMIT (LATEST)
+  # ==========================
+  spark-submit:
+    image: bde2020/spark-submit:latest
+    container_name: spark-submit
+    hostname: spark-submit
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    volumes:
+      - ./spark-apps:/opt/spark-apps
+    networks:
+      - hadoop
+    depends_on:
+      - spark-master
+      - spark-worker
 
 volumes:
   namenode:
