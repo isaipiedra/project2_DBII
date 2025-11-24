@@ -1,5 +1,6 @@
 services:
 
+
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
@@ -9,6 +10,7 @@ services:
       - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
     volumes:
       - namenode:/hadoop/dfs/name
+      - ./spark-apps:/opt/spark-apps    
     ports:
       - "9000:9000"
       - "9870:9870"
@@ -41,15 +43,15 @@ services:
     environment:
       - SPARK_MODE=master
       - SPARK_MASTER_PORT=7077
-      
       - SPARK_DRIVER_MEMORY=6g
       - SPARK_EXECUTOR_MEMORY=6g
       - SPARK_DRIVER_MAXRESULTSIZE=4g
     ports:
-      - "8080:8080"   
+      - "8080:8080"
       - "7077:7077"
     networks:
       - hadoop
+
 
   spark-worker:
     image: bde2020/spark-worker:latest
@@ -57,16 +59,13 @@ services:
     hostname: spark-worker
     environment:
       - SPARK_MASTER=spark://spark-master:7077
-      
       - SPARK_WORKER_MEMORY=6g
       - SPARK_WORKER_CORES=2
-      
       - SPARK_EXECUTOR_MEMORY=6g
     networks:
       - hadoop
     depends_on:
       - spark-master
-
 
   spark-submit:
     image: bde2020/spark-submit:latest
@@ -74,15 +73,13 @@ services:
     hostname: spark-submit
     environment:
       - SPARK_MASTER=spark://spark-master:7077
-      
       - SPARK_DRIVER_MEMORY=6g
       - SPARK_EXECUTOR_MEMORY=6g
       - SPARK_DRIVER_MAXRESULTSIZE=4g
       - SPARK_LOCAL_DIRS=/tmp
-
-    command: ["tail", "-f", "/dev/null"]   
+    command: ["tail", "-f", "/dev/null"]
     volumes:
-      - ./spark-apps:/opt/spark-apps       
+      - ./spark-apps:/opt/spark-apps     
     networks:
       - hadoop
     depends_on:
