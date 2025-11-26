@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS Songs (
     name VARCHAR(500)
 );
 
+/*Metricas de las consultas que lo necesiten*/
 CREATE TABLE IF NOT EXISTS Metrics(
 	query INT PRIMARY KEY,
     average DOUBLE,
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS Metrics(
     standard_deviation DOUBLE
 );
 
+/*Tabla para las consultas que solo devuelven un valor*/
 CREATE TABLE IF NOT EXISTS Single_Value_Queries(
 	query INT PRIMARY KEY,
     value DOUBLE
