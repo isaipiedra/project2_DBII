@@ -19,7 +19,7 @@ mysql_props = {
     "driver": "com.mysql.cj.jdbc.Driver"
 }
 
-print("📖 Reading songs from data warehouse...")
+print("\n\n\nReading songs from data warehouse...\n\n\n")
 
 # Read fact or dimension table that contains songs
 dim_song = spark.read.parquet(DW + "track")
@@ -32,14 +32,8 @@ songs_for_mysql = dim_song.select(
     substring(col("track_name"), 1, 450).alias("name")
 ).dropDuplicates(["id"])
 
-print(f"✓ Unique songs after deduplication: {songs_for_mysql.count()}")
-
-# Show sample
-print("\n📝 Sample data:")
-songs_for_mysql.show(5, truncate=False)
-
 # Insert into MySQL
-print("\n💾 Inserting songs into MySQL...")
+print("\n\n\nInserting songs into MySQL...\n\n\n")
 songs_for_mysql.write.jdbc(
     url=mysql_url,
     table="Songs",
@@ -47,6 +41,6 @@ songs_for_mysql.write.jdbc(
     properties=mysql_props
 )
 
-print(f"✅ Successfully inserted {songs_for_mysql.count()} songs!")
+print(f"\n\n\nSuccessfully inserted {songs_for_mysql.count()} songs!\n\n\n")
 
 spark.stop()

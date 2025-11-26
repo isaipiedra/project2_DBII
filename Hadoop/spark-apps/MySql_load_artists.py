@@ -16,7 +16,7 @@ mysql_props = {
     "driver": "com.mysql.cj.jdbc.Driver"
 }
 
-print("📖 Reading artists...")
+print("\n\n\nReading artists...\n\n\n")
 
 dim_artist = spark.read.parquet(DW + "artist")
 
@@ -32,5 +32,5 @@ artists_for_mysql.write.jdbc(
     properties=mysql_props
 )
 
-print("✅ Artists inserted successfully!")
+print("Artists inserted successfully!")
 spark.stop()

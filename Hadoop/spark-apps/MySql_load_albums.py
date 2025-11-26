@@ -16,7 +16,7 @@ mysql_props = {
     "driver": "com.mysql.cj.jdbc.Driver"
 }
 
-print("📀 Reading albums...")
+print("\n\n\nReading albums...\n\n\n")
 
 dim_album = spark.read.parquet(DW + "album")
 
@@ -32,5 +32,5 @@ albums_for_mysql.write.jdbc(
     properties=mysql_props
 )
 
-print("✅ Albums inserted successfully!")
+print("\n\n\nAlbums inserted successfully!\n\n\n")
 spark.stop()

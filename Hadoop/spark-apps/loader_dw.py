@@ -100,4 +100,4 @@ fact_tracks.write.mode("overwrite").parquet(DW + "fact_tracks")
 fact_albums.write.mode("overwrite").parquet(DW + "fact_albums")
 
 spark.stop()
-print("🎉 DW generado SIN pérdida de información")
+print("DW generado SIN pérdida de información")
