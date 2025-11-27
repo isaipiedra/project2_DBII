@@ -20,10 +20,14 @@ print("\n\n\nReading artists...\n\n\n")
 
 dim_artist = spark.read.parquet(DW + "artist")
 
-artists_for_mysql = dim_artist.select(
-    col("artist_id").alias("id"),
-    substring(col("artist_name"), 1, 500).alias("name")
-).dropDuplicates(["id"])
+artists_for_mysql = dim_artist \
+    .filter(col("artist_id").isNotNull()) \
+    .select(
+        col("artist_id").alias("id"),
+        substring(col("artist_name"), 1, 500).alias("name")
+    ) \
+    .dropDuplicates(["id"])
+
 
 artists_for_mysql.write.jdbc(
     url=mysql_url,

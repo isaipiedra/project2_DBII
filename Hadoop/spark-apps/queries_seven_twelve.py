@@ -204,7 +204,7 @@ def main():
 
     print("===TrioArtistas===")
     dp=q_trio_artists(spark)
-    dp.show(50, truncate=False)
+    dp.show(10, truncate=False)
 
 if __name__ == "__main__":
     main()
