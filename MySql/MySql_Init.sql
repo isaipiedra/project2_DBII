@@ -101,20 +101,35 @@ CREATE TABLE IF NOT EXISTS Unique_Items(
 /*9. Usuarios con listas top-3 idénticas — contar duplicados de top-10 y mostrar las duplicaciones más comunes.*/
 CREATE TABLE IF NOT EXISTS top_10_Duplicated_Artists(
 	ranking INT PRIMARY KEY,
-	artist_id INT,
-    FOREIGN KEY (artist_id) REFERENCES Artists(id)
+	artist_id_1 INT,
+    FOREIGN KEY (artist_id_1) REFERENCES Artists(id),
+    artist_id_2 INT,
+    FOREIGN KEY (artist_id_2) REFERENCES Artists(id),
+    artist_id_3 INT,
+    FOREIGN KEY (artist_id_3) REFERENCES Artists(id),
+    total_users INT
 );
 
 CREATE TABLE IF NOT EXISTS top_10_Duplicated_Albums(
 	ranking INT PRIMARY KEY,
-	album_id INT,
-    FOREIGN KEY (album_id) REFERENCES Albums(id)
+	album_id_1 INT,
+    FOREIGN KEY (album_id_1) REFERENCES Albums(id),
+    album_id_2 INT,
+    FOREIGN KEY (album_id_2) REFERENCES Albums(id),
+    album_id_3 INT,
+    FOREIGN KEY (album_id_3) REFERENCES Albums(id),
+    total_users INT
 );
 
 CREATE TABLE IF NOT EXISTS top_10_Duplicated_Songs(
 	ranking INT PRIMARY KEY,
-	song_id INT,
-    FOREIGN KEY (song_id) REFERENCES Songs(id)
+	song_id_1 INT,
+    FOREIGN KEY (song_id_1) REFERENCES Songs(id),
+    song_id_2 INT,
+    FOREIGN KEY (song_id_2) REFERENCES Songs(id),
+    song_id_3 INT,
+    FOREIGN KEY (song_id_3) REFERENCES Songs(id),
+    total_users INT
 );
 
 /*10. Usuarios con gustos muy concentrados — contar usuarios cuyo top 5 pertenece todo al mismo

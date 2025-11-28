@@ -103,26 +103,29 @@ def insert_unique_items(spark, user_id, artists, songs, albums):
     df.write.jdbc(mysql_url, "Unique_Items", "append", mysql_props)
 
 # 9. Usuarios con listas top-3 idénticas — contar duplicados de top-10 y mostrar las duplicaciones más comunes.
-def insert_top10_duplicated_artist(spark, ranking, artist_id):
+def insert_top10_duplicated_artist(spark, ranking, artist_id_1, artist_id_2, artist_id_3, total_users):
     df = spark.createDataFrame(
-        [(ranking, artist_id)],
-        ["ranking", "artist_id"]
+        [(ranking, artist_id_1, artist_id_2, artist_id_3, total_users)],
+        ["ranking", "artist_id_1", "artist_id_2", "artist_id_3", "total_users"]
     )
     df.write.jdbc(mysql_url, "top_10_Duplicated_Artists", "append", mysql_props)
 
-def insert_top10_duplicated_album(spark, ranking, album_id):
+
+def insert_top10_duplicated_album(spark, ranking, album_id_1, album_id_2, album_id_3, total_users):
     df = spark.createDataFrame(
-        [(ranking, album_id)],
-        ["ranking", "album_id"]
+        [(ranking, album_id_1, album_id_2, album_id_3, total_users)],
+        ["ranking", "album_id_1", "album_id_2", "album_id_3", "total_users"]
     )
     df.write.jdbc(mysql_url, "top_10_Duplicated_Albums", "append", mysql_props)
 
-def insert_top10_duplicated_song(spark, ranking, song_id):
+
+def insert_top10_duplicated_song(spark, ranking, song_id_1, song_id_2, song_id_3, total_users):
     df = spark.createDataFrame(
-        [(ranking, song_id)],
-        ["ranking", "song_id"]
+        [(ranking, song_id_1, song_id_2, song_id_3, total_users)],
+        ["ranking", "song_id_1", "song_id_2", "song_id_3", "total_users"]
     )
     df.write.jdbc(mysql_url, "top_10_Duplicated_Songs", "append", mysql_props)
+
 
 # 10. Usuarios con gustos muy concentrados — contar usuarios cuyo top 5 pertenece todo al mismo
 # artista.
