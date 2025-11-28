@@ -3,15 +3,8 @@ from itertools import combinations
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window
 from metrics_inserts import (
-    insert_items_per_user,
-    insert_unique_items,
-    insert_metrics,
-    insert_top10_duplicated_artist,
-    insert_top10_duplicated_album,
-    insert_top10_duplicated_song,
-    insert_loyal_listeners,
-    insert_paired_artists,
-    insert_trio_artists
+    init_spark_session,
+    insert_metrics
 )
 from pyspark.sql import SparkSession
 
@@ -119,7 +112,7 @@ def q_avg_med_std(spark):
     )
     
     SELECT AVG(total_items) as average, percentile_approx(total_items, 0.5) AS median,
-    stddev(total_items) AS standard_desviation
+    stddev(total_items) AS standard_deviation
     FROM items
     """
 
@@ -391,62 +384,24 @@ def q_triplet_artists(spark):
     return result
 
 def main():
-    spark = SparkSession.builder \
-        .appName("Queries 7-12") \
-        .config("spark.sql.shuffle.partitions", "400") \
-        .getOrCreate()
-
+    spark = init_spark_session()
     spark.sparkContext.setLogLevel("ERROR")
 
-    # Cargar vistas
     load_tables(spark)
 
-    # ==== Query 7 ====
-    print("=== Q7: Items por usuario ===")
-    df7 = q_items_usuario(spark)
-    df7.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q7_items_per_user")
-    df7.show(20, truncate=False)
+    df_metrics = q_avg_med_std(spark)
+    df_metrics.show()
 
-    # ==== Query 8 ====
-    print("=== Q8: Elementos únicos ===")
-    df8 = q_unique_elements(spark)
-    df8.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q8_unique_items")
-    df8.show(20, truncate=False)
+    row = df_metrics.collect()[0]
 
-    # ==== Query 9 ====
-    print("=== Q9: Tripletas duplicadas ===")
+    insert_metrics(
+        spark,
+        query=7,
+        average=row.average,
+        median=row.median,
+        standard_deviation=row.standard_deviation
+    )
 
-    df9a = q_duplicated_artists(spark)
-    df9a.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q9_artists")
-    df9a.show(20, truncate=False)
-
-    df9b = q_duplicated_albums(spark)
-    df9b.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q9_albums")
-    df9b.show(20, truncate=False)
-
-    df9c = q_duplicated_tracks(spark)
-    df9c.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q9_tracks")
-    df9c.show(20, truncate=False)
-
-    # ==== Query 10 ====
-    print("=== Q10: Loyal listeners ===")
-    df10 = q_loyal_listeners(spark)
-    df10.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q10_loyal_listeners")
-    df10.show(20, truncate=False)
-
-    # ==== Query 12 ====
-    print("=== Q12: Tripletas frecuentes ===")
-    df12 = q_triplet_artists(spark)
-    df12.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q12_artist_trios")
-    df12.show(20, truncate=False)
-
-    # ==== Query 11 ====
-    print("=== Q11: Pares frecuentes ===")
-    df11 = q_paired_frequent_artists(spark)
-    df11.write.mode("overwrite").parquet("hdfs://namenode:9000/music_results/q11_artist_pairs")
-    df11.show(20, truncate=False)
-
-    print("=== TODO LISTO ===")
     spark.stop()
 
 
