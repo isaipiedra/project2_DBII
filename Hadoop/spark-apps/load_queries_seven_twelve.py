@@ -42,7 +42,6 @@ df7 = load_parquet("q7_items_per_user") \
     )
 
 df7.write.jdbc(mysql_url, "Items_Per_User", "append", mysql_props)
-print("OK → Items_Per_User")
 
 
 
@@ -50,43 +49,54 @@ print("OK → Items_Per_User")
 df8 = load_parquet("q8_unique_items") \
     .select(
         F.col("user_id").cast("int"),
-        F.col("amount_artists").alias("artists"),
-        F.col("amount_tracks").alias("songs"),
-        F.col("amount_albums").alias("albums")
+        F.col("amount_artists").alias("artists").cast("int"),
+        F.col("amount_tracks").alias("songs").cast("int"),
+        F.col("amount_albums").alias("albums").cast("int")
     )
 
 df8.write.jdbc(mysql_url, "Unique_Items", "append", mysql_props)
-print("OK → Unique_Items")
 
 
 
 # ============= QUERY 9 (Artistas) =============
-df9_art = load_parquet("q9_artists").select(
-    "ranking", "artist_id_1", "artist_id_2", "artist_id_3", "total_users"
-)
+df9_art = load_parquet("q9_artists") \
+    .select(
+        F.col("Ranking_triple").alias("ranking").cast("int"), 
+        "artist_id_1", 
+        "artist_id_2", 
+        "artist_id_3", 
+        F.col("total_users").cast("int")
+    )
 
 df9_art.write.jdbc(mysql_url, "top_10_Duplicated_Artists", "append", mysql_props)
-print("OK → top_10_Duplicated_Artists")
 
 
 
 # ============= QUERY 9 (Álbumes) =============
-df9_alb = load_parquet("q9_albums").select(
-    "ranking", "album_id_1", "album_id_2", "album_id_3", "total_users"
-)
+df9_alb = load_parquet("q9_albums") \
+    .select(
+        F.col("Ranking_triple").alias("ranking").cast("int"),  
+        "album_id_1", 
+        "album_id_2", 
+        "album_id_3", 
+        F.col("total_users").cast("int")
+    )
 
 df9_alb.write.jdbc(mysql_url, "top_10_Duplicated_Albums", "append", mysql_props)
-print("OK → top_10_Duplicated_Albums")
 
 
 
 # ============= QUERY 9 (Tracks) =============
-df9_songs = load_parquet("q9_tracks").select(
-    "ranking", "track_id_1", "track_id_2", "track_id_3", "total_users"
-)
+df9_songs = load_parquet("q9_tracks") \
+    .select(
+        F.col("ranking_triple").alias("ranking").cast("int"),
+        F.col("track_id_1").alias("song_id_1"), 
+        F.col("track_id_2").alias("song_id_2"),
+        F.col("track_id_3").alias("song_id_3"),
+        F.col("total_users").cast("int")
+    )
 
 df9_songs.write.jdbc(mysql_url, "top_10_Duplicated_Songs", "append", mysql_props)
-print("OK → top_10_Duplicated_Songs")
 
 
 
@@ -94,23 +104,21 @@ print("OK → top_10_Duplicated_Songs")
 df10 = load_parquet("q10_loyal_listeners") \
     .select(
         "artist_id",
-        F.col("loyal_user_count").alias("loyal_listeners")
+        F.col("loyal_user_count").alias("loyal_listeners").cast("int")
     )
 
 df10.write.jdbc(mysql_url, "Loyal_Listeners", "append", mysql_props)
-print("OK → Loyal_Listeners")
 
 
 
-# ============= QUERY 11 (Pairs INSERTADO) =============
-print("===Top 2 Artists===")
+# ============= QUERY 11 (Pairs) =============
 
 df11 = load_parquet("top_artist_pairs") \
     .select(
-        "ranking",
+        F.col("ranking").cast("int"),
         F.col("artist_1").alias("artist_1_id"),
         F.col("artist_2").alias("artist_2_id"),
-        "total_users"
+        F.col("total_users").cast("int")
     )
 
 df11.write.jdbc(mysql_url, "top_50_Paired_Artists", "append", mysql_props)
@@ -121,17 +129,15 @@ print("OK → top_50_Paired_Artists")
 # ============= QUERY 12 (Trios) =============
 df12 = load_parquet("q12_artist_trios") \
     .select(
-        "ranking",
+        F.col("ranking").cast("int"),
         F.col("artist_1").alias("artist_1_id"),
         F.col("artist_2").alias("artist_2_id"),
         F.col("artist_3").alias("artist_3_id"),
-        "total_users"
+        F.col("total_users").cast("int")
     )
 
 df12.write.jdbc(mysql_url, "top_20_Trio_Artists", "append", mysql_props)
-print("OK → top_20_Trio_Artists")
 
 
 
-print("\n=== FINALIZADO: TODOS LOS PARQUETS SUBIDOS A MYSQL ===\n")
 spark.stop()
