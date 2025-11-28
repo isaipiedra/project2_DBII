@@ -138,18 +138,18 @@ def insert_loyal_listeners(spark, artist_id, loyal_listeners):
 
 # 11. Pares de artistas más frecuentes — contar cuántas veces dos artistas aparecen juntos en la
 # misma lista de usuario; mostrar top 50 pares.
-def insert_paired_artists(spark, ranking, artist_1_id, artist_2_id):
+def insert_paired_artists(spark, ranking, artist_1_id, artist_2_id, total_users):
     df = spark.createDataFrame(
-        [(ranking, artist_1_id, artist_2_id)],
-        ["ranking", "artist_1_id", "artist_2_id"]
+        [(ranking, artist_1_id, artist_2_id, total_users)],
+        ["ranking", "artist_1_id", "artist_2_id", "total_users"]
     )
     df.write.jdbc(mysql_url, "top_50_Paired_Artists", "append", mysql_props)
 
 # 12. Combinaciones de 3 artistas frecuentes — contar tripletas frecuentes.
-def insert_trio_artists(spark, ranking, artist_1_id, artist_2_id, artist_3_id):
+def insert_trio_artists(spark, ranking, artist_1_id, artist_2_id, artist_3_id, total_users):
     df = spark.createDataFrame(
-        [(ranking, artist_1_id, artist_2_id, artist_3_id)],
-        ["ranking", "artist_1_id", "artist_2_id", "artist_3_id"]
+        [(ranking, artist_1_id, artist_2_id, artist_3_id, total_users)],
+        ["ranking", "artist_1_id", "artist_2_id", "artist_3_id", "total_users"]
     )
     df.write.jdbc(mysql_url, "top_20_Trio_Artists", "append", mysql_props)
 

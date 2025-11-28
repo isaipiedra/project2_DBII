@@ -125,36 +125,36 @@ CREATE TABLE IF NOT EXISTS Unique_Items(
 -- ============================
 
 CREATE TABLE IF NOT EXISTS top_10_Duplicated_Artists(
-	ranking INT PRIMARY KEY,
-	artist_id_1 INT,
+    ranking INT PRIMARY KEY,
+    artist_id_1 VARCHAR(64),
+    artist_id_2 VARCHAR(64),
+    artist_id_3 VARCHAR(64),
+    total_users INT,
     FOREIGN KEY (artist_id_1) REFERENCES Artists(id),
-    artist_id_2 INT,
     FOREIGN KEY (artist_id_2) REFERENCES Artists(id),
-    artist_id_3 INT,
-    FOREIGN KEY (artist_id_3) REFERENCES Artists(id),
-    total_users INT
+    FOREIGN KEY (artist_id_3) REFERENCES Artists(id)
 );
 
 CREATE TABLE IF NOT EXISTS top_10_Duplicated_Albums(
-	ranking INT PRIMARY KEY,
-	album_id_1 INT,
+    ranking INT PRIMARY KEY,
+    album_id_1 VARCHAR(64),
+    album_id_2 VARCHAR(64),
+    album_id_3 VARCHAR(64),
+    total_users INT,
     FOREIGN KEY (album_id_1) REFERENCES Albums(id),
-    album_id_2 INT,
     FOREIGN KEY (album_id_2) REFERENCES Albums(id),
-    album_id_3 INT,
-    FOREIGN KEY (album_id_3) REFERENCES Albums(id),
-    total_users INT
+    FOREIGN KEY (album_id_3) REFERENCES Albums(id)
 );
 
 CREATE TABLE IF NOT EXISTS top_10_Duplicated_Songs(
-	ranking INT PRIMARY KEY,
-	song_id_1 INT,
+    ranking INT PRIMARY KEY,
+    song_id_1 VARCHAR(64),
+    song_id_2 VARCHAR(64),
+    song_id_3 VARCHAR(64),
+    total_users INT,
     FOREIGN KEY (song_id_1) REFERENCES Songs(id),
-    song_id_2 INT,
     FOREIGN KEY (song_id_2) REFERENCES Songs(id),
-    song_id_3 INT,
-    FOREIGN KEY (song_id_3) REFERENCES Songs(id),
-    total_users INT
+    FOREIGN KEY (song_id_3) REFERENCES Songs(id)
 );
 
 -- ============================
@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS top_50_Paired_Artists(
     ranking INT PRIMARY KEY,
     artist_1_id VARCHAR(64),
     artist_2_id VARCHAR(64),
+    total_users INT,
     FOREIGN KEY (artist_1_id) REFERENCES Artists(id),
     FOREIGN KEY (artist_2_id) REFERENCES Artists(id)
 );
@@ -188,6 +189,7 @@ CREATE TABLE IF NOT EXISTS top_20_Trio_Artists(
     artist_1_id VARCHAR(64),
     artist_2_id VARCHAR(64),
     artist_3_id VARCHAR(64),
+    total_users INT,
     FOREIGN KEY (artist_1_id) REFERENCES Artists(id),
     FOREIGN KEY (artist_2_id) REFERENCES Artists(id),
     FOREIGN KEY (artist_3_id) REFERENCES Artists(id)
