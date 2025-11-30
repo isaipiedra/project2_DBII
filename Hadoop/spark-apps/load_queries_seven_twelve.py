@@ -40,7 +40,7 @@ df7 = load_parquet("q7_items_per_user") \
     )
 
 df7.write.mode("overwrite").jdbc(mysql_url, "Items_Per_User", properties=mysql_props)
-print("✅ OK → Items_Per_User")
+print("OK → Items_Per_User")
 
 
 # =========================================================
@@ -56,7 +56,7 @@ df8 = load_parquet("q8_unique_items") \
     )
 
 df8.write.mode("overwrite").jdbc(mysql_url, "Unique_Items", properties=mysql_props)
-print("✅ OK → Unique_Items")
+print("OK → Unique_Items")
 
 
 # =========================================================
@@ -74,7 +74,7 @@ df9_art = load_parquet("q9_artists") \
     )
 
 df9_art.write.mode("overwrite").jdbc(mysql_url, "top_10_Duplicated_Artists", properties=mysql_props)
-print("✅ OK → top_10_Duplicated_Artists")
+print("OK → top_10_Duplicated_Artists")
 
 
 # =========================================================
@@ -92,7 +92,7 @@ df9_alb = load_parquet("q9_albums") \
     )
 
 df9_alb.write.mode("overwrite").jdbc(mysql_url, "top_10_Duplicated_Albums", properties=mysql_props)
-print("✅ OK → top_10_Duplicated_Albums")
+print("OK → top_10_Duplicated_Albums")
 
 
 # =========================================================
@@ -110,7 +110,7 @@ df9_songs = load_parquet("q9_tracks") \
     )
 
 df9_songs.write.mode("overwrite").jdbc(mysql_url, "top_10_Duplicated_Songs", properties=mysql_props)
-print("✅ OK → top_10_Duplicated_Songs")
+print("OK → top_10_Duplicated_Songs")
 
 
 # =========================================================
@@ -124,7 +124,7 @@ df10 = load_parquet("q10_loyal_listeners") \
     )
 
 df10.write.mode("overwrite").jdbc(mysql_url, "Loyal_Listeners", properties=mysql_props)
-print("✅ OK → Loyal_Listeners")
+print("OK → Loyal_Listeners")
 
 
 # =========================================================
@@ -140,7 +140,7 @@ df11 = load_parquet("q11_artist_pairs") \
     )
 
 df11.write.mode("overwrite").jdbc(mysql_url, "top_50_Paired_Artists", properties=mysql_props)
-print("✅ OK → top_50_Paired_Artists")
+print("OK → top_50_Paired_Artists")
 
 
 # =========================================================
@@ -157,7 +157,7 @@ df12 = load_parquet("q12_artist_trios") \
     )
 
 df12.write.mode("overwrite").jdbc(mysql_url, "top_20_Trio_Artists", properties=mysql_props)
-print("✅ OK → top_20_Trio_Artists")
+print("OK → top_20_Trio_Artists")
 
-print("\n=== ✅ FINALIZADO: TODOS LOS PARQUETS SUBIDOS A MYSQL ===\n")
+print("\n=== FINALIZADO: TODOS LOS PARQUETS SUBIDOS A MYSQL ===\n")
 spark.stop()
