@@ -1,3 +1,4 @@
+/* ===== CSS VARIABLES ===== */
 :root {
     --background: #121212;
     --secondary-background: #161616;
@@ -103,8 +104,19 @@ main h1 {
     padding: 1.5em;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(168, 218, 220, 0.2);
-    min-height: 500px;
+    min-height: 400px;
+    max-height: 600px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chart-box > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .chart-title {
@@ -131,7 +143,6 @@ main h1 {
     width: 100%;
 }
 
-/* Bar Chart Styles */
 .bar-section {
     display: flex;
     flex-direction: column;
@@ -139,6 +150,7 @@ main h1 {
     overflow-y: auto;
     padding-right: 1em;
     height: 100%;
+    max-height: 350px;
 }
 
 .bar-item {
@@ -187,7 +199,6 @@ main h1 {
     font-family: 'Courier New', monospace;
 }
 
-/* Pie Chart Styles */
 .pie-section {
     display: flex;
     flex-direction: column;
@@ -275,6 +286,8 @@ main h1 {
     grid-template-columns: 1fr 2fr;
     gap: 2em;
     margin-top: 1em;
+    height: 100%;
+    overflow: hidden;
 }
 
 .metrics-section {
@@ -282,6 +295,7 @@ main h1 {
     padding: 1.5em;
     border-radius: 8px;
     border: 1px solid rgba(168, 218, 220, 0.2);
+    overflow-y: auto;
 }
 
 .metrics-section h3 {
@@ -440,7 +454,7 @@ main h1 {
     font-family: 'Courier New', monospace;
 }
 
-/* ===== SCROLLABLE TABLE CONTAINERS ===== */
+/* ===== QUERY 8 STYLES ===== */
 .table-container {
     max-height: 400px;
     overflow-y: auto;
@@ -448,7 +462,6 @@ main h1 {
     border: 1px solid rgba(168, 218, 220, 0.2);
 }
 
-/* ===== QUERY 8 STYLES ===== */
 .unique-items-table {
     width: 100%;
     border-collapse: collapse;
@@ -481,7 +494,7 @@ main h1 {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* ===== QUERY 9 TABLE STYLES (No sticky headers) ===== */
+/* ===== QUERY 9 STYLES ===== */
 .query9-table {
     width: 100%;
     border-collapse: collapse;
@@ -504,7 +517,6 @@ main h1 {
     color: var(--background);
     font-weight: 600;
     font-size: 14px;
-    /* REMOVED position: sticky and top properties */
 }
 
 .query9-table td {
@@ -513,141 +525,6 @@ main h1 {
 
 .query9-table tr:hover {
     background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* ===== QUERY 11, 12 TABLE STYLES (Keep sticky headers) ===== */
-.triplets-table,
-.pairs-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--secondary-background);
-}
-
-.triplets-table th,
-.triplets-table td,
-.pairs-table th,
-.pairs-table td {
-    padding: 1em;
-    text-align: left;
-    border-bottom: 1px solid rgba(168, 218, 220, 0.2);
-    font-size: 14px;
-}
-
-.triplets-table th,
-.pairs-table th {
-    background-color: var(--primary-color);
-    color: var(--background);
-    font-weight: 600;
-    font-size: 14px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.triplets-table td,
-.pairs-table td {
-    color: var(--font);
-}
-
-.triplets-table tr:hover,
-.pairs-table tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* ===== QUERY 9, 11, 12 TABLE STYLES (Updated for scroll) ===== */
-.triplets-table,
-.pairs-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--secondary-background);
-}
-
-.triplets-table th,
-.triplets-table td,
-.pairs-table th,
-.pairs-table td {
-    padding: 1em;
-    text-align: left;
-    border-bottom: 1px solid rgba(168, 218, 220, 0.2);
-    font-size: 14px;
-}
-
-.triplets-table th,
-.pairs-table th {
-    background-color: var(--primary-color);
-    color: var(--background);
-    font-weight: 600;
-    font-size: 14px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.triplets-table td,
-.pairs-table td {
-    color: var(--font);
-}
-
-.triplets-table tr:hover,
-.pairs-table tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* ===== SCROLLBAR STYLES FOR TABLE CONTAINERS ===== */
-.table-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: #457B9D;
-}
-
-/* ===== RESPONSIVE DESIGN FOR SCROLLABLE TABLES ===== */
-@media (max-width: 1200px) {
-    .table-container {
-        max-height: 350px;
-    }
-    
-    .unique-items-table th,
-    .unique-items-table td,
-    .triplets-table th,
-    .triplets-table td,
-    .pairs-table th,
-    .pairs-table td {
-        padding: 0.8em 0.5em;
-        font-size: 12px;
-    }
-}
-
-@media (max-width: 768px) {
-    .table-container {
-        max-height: 300px;
-    }
-    
-    .unique-items-table,
-    .triplets-table,
-    .pairs-table {
-        font-size: 11px;
-    }
-    
-    .unique-items-table th,
-    .unique-items-table td,
-    .triplets-table th,
-    .triplets-table td,
-    .pairs-table th,
-    .pairs-table td {
-        padding: 0.6em 0.3em;
-    }
 }
 
 /* ===== QUERY 10 STYLES ===== */
@@ -673,49 +550,102 @@ main h1 {
     opacity: 0.9;
 }
 
-/* ===== RESPONSIVE DESIGN FOR TABLES ===== */
-@media (max-width: 1200px) {
-    .triplets-table th,
-    .triplets-table td,
-    .pairs-table th,
-    .pairs-table td {
-        padding: 0.8em 0.5em;
-        font-size: 12px;
-    }
-    
-    .metric-item-large {
-        width: 90%;
-        min-width: 250px;
-    }
-    
-    .metric-label-large {
-        font-size: 16px;
-    }
-    
-    .metric-value-large {
-        font-size: 20px;
-    }
+/* ===== QUERY 11 & 12 STYLES ===== */
+.triplets-table,
+.pairs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--secondary-background);
 }
 
-@media (max-width: 768px) {
-    .triplets-table,
-    .pairs-table {
-        font-size: 12px;
-    }
-    
-    .loyal-value {
-        font-size: 36px;
-    }
-    
-    .loyal-label {
-        font-size: 16px;
-    }
-    
-    .metric-item-large {
-        flex-direction: column;
-        gap: 0.5em;
-        text-align: center;
-    }
+.triplets-table th,
+.triplets-table td,
+.pairs-table th,
+.pairs-table td {
+    padding: 1em;
+    text-align: left;
+    border-bottom: 1px solid rgba(168, 218, 220, 0.2);
+    font-size: 14px;
+}
+
+.triplets-table th,
+.pairs-table th {
+    background-color: var(--primary-color);
+    color: var(--background);
+    font-weight: 600;
+    font-size: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.triplets-table td,
+.pairs-table td {
+    color: var(--font);
+}
+
+.triplets-table tr:hover,
+.pairs-table tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ===== SINGLE VALUE DISPLAYS ===== */
+.single-value-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    background-color: var(--secondary-background);
+    border-radius: 8px;
+    border: 1px solid rgba(168, 218, 220, 0.2);
+    padding: 2em;
+}
+
+.single-value-number {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 0.5em;
+}
+
+.single-value-label {
+    font-size: 18px;
+    color: var(--font);
+    text-align: center;
+    opacity: 0.9;
+}
+
+/* ===== SCROLLBAR STYLES ===== */
+.bar-section::-webkit-scrollbar,
+.histogram-section::-webkit-scrollbar,
+.table-container::-webkit-scrollbar,
+.metrics-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.bar-section::-webkit-scrollbar-track,
+.histogram-section::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track,
+.metrics-section::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.bar-section::-webkit-scrollbar-thumb,
+.histogram-section::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb,
+.metrics-section::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.bar-section::-webkit-scrollbar-thumb:hover,
+.histogram-section::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover,
+.metrics-section::-webkit-scrollbar-thumb:hover {
+    background: #457B9D;
 }
 
 /* ===== TOOLTIP STYLES ===== */
@@ -744,31 +674,13 @@ main h1 {
     margin: 3px 0 !important;
 }
 
-/* ===== SCROLLBAR STYLES ===== */
-.bar-section::-webkit-scrollbar,
-.histogram-section::-webkit-scrollbar {
-    width: 8px;
-}
-
-.bar-section::-webkit-scrollbar-track,
-.histogram-section::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.bar-section::-webkit-scrollbar-thumb,
-.histogram-section::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
-}
-
-.bar-section::-webkit-scrollbar-thumb:hover,
-.histogram-section::-webkit-scrollbar-thumb:hover {
-    background: #457B9D;
-}
-
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1200px) {
+    .chart-box {
+        min-height: 350px;
+        max-height: 500px;
+    }
+    
     .chart-content {
         grid-template-columns: 1fr;
         height: auto;
@@ -790,8 +702,39 @@ main h1 {
         gap: 1em;
     }
     
+    .bar-section {
+        max-height: 300px;
+    }
+    
     .histogram-bar-label {
         flex: 0 0 150px;
+    }
+    
+    .table-container {
+        max-height: 350px;
+    }
+    
+    .unique-items-table th,
+    .unique-items-table td,
+    .triplets-table th,
+    .triplets-table td,
+    .pairs-table th,
+    .pairs-table td {
+        padding: 0.8em 0.5em;
+        font-size: 12px;
+    }
+    
+    .metric-item-large {
+        width: 90%;
+        min-width: 250px;
+    }
+    
+    .metric-label-large {
+        font-size: 16px;
+    }
+    
+    .metric-value-large {
+        font-size: 20px;
     }
 }
 
@@ -848,5 +791,46 @@ main h1 {
     .histogram-bar-label {
         flex: 0 0 120px;
         font-size: 11px;
+    }
+    
+    .table-container {
+        max-height: 300px;
+    }
+    
+    .unique-items-table,
+    .triplets-table,
+    .pairs-table {
+        font-size: 11px;
+    }
+    
+    .unique-items-table th,
+    .unique-items-table td,
+    .triplets-table th,
+    .triplets-table td,
+    .pairs-table th,
+    .pairs-table td {
+        padding: 0.6em 0.3em;
+    }
+    
+    .loyal-value {
+        font-size: 36px;
+    }
+    
+    .loyal-label {
+        font-size: 16px;
+    }
+    
+    .metric-item-large {
+        flex-direction: column;
+        gap: 0.5em;
+        text-align: center;
+    }
+    
+    .single-value-number {
+        font-size: 36px;
+    }
+    
+    .single-value-label {
+        font-size: 16px;
     }
 }

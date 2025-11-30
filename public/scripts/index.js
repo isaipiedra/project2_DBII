@@ -1,3 +1,5 @@
+// ============ INITIALIZATION ============
+
 document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.tab_navigation li');
     const sections = document.querySelectorAll('main');
@@ -17,21 +19,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetSection) {
                 targetSection.style.display = 'block';
                 
-                // Load data based on which tab is active
                 if (index === 0) {
                     loadAllAnalytics();
                 } else if (index === 1) {
                     loadTab2Data();
                 } else if (index === 2) {
                     loadTab3Data();
+                } else if (index === 3) {
+                    loadTab4Data();
+                } else if (index === 4) {
+                    loadTab5Data();
                 }
             }
         });
     });
     
-    // Load initial data for first tab
     loadAllAnalytics();
 });
+
+// ============ TAB 1: POPULARITY AND FREQUENCY ============
 
 async function loadAllAnalytics() {
     try {
@@ -314,6 +320,793 @@ function renderQuery6(containerId, data) {
     container.appendChild(percentageDiv);
 }
 
+// ============ TAB 2: SIMPLE COUNTS BY USER ============
+
+async function loadTab2Data() {
+    try {
+        const [
+            itemsMetrics,
+            uniqueItems,
+            duplicatedArtists,
+            duplicatedAlbums,
+            duplicatedSongs,
+            loyalListeners
+        ] = await Promise.all([
+            fetch('/api/items-per-user-metrics').then(res => res.json()),
+            fetch('/api/unique-items').then(res => res.json()),
+            fetch('/api/duplicated-artists').then(res => res.json()),
+            fetch('/api/duplicated-albums').then(res => res.json()),
+            fetch('/api/duplicated-songs').then(res => res.json()),
+            fetch('/api/loyal-listeners').then(res => res.json())
+        ]);
+
+        renderQuery7('query7-container', itemsMetrics);
+        renderQuery8('query8-container', uniqueItems);
+        renderQuery9('query9-artists-container', duplicatedArtists, 'Top 10 Duplicated Artists');
+        renderQuery9('query9-albums-container', duplicatedAlbums, 'Top 10 Duplicated Albums');
+        renderQuery9('query9-songs-container', duplicatedSongs, 'Top 10 Duplicated Songs');
+        renderQuery10('query10-container', loyalListeners);
+    } catch (error) {
+        console.error('Error loading tab 2 data:', error);
+    }
+}
+
+function renderQuery7(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Items per user';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.average === undefined) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const metricsDiv = document.createElement('div');
+    metricsDiv.className = 'simple-metrics';
+
+    metricsDiv.innerHTML = `
+        <div class="metric-item-large">
+            <span class="metric-label-large">Average Items per User:</span>
+            <span class="metric-value-large">${data.average.toFixed(2)}</span>
+        </div>
+        <div class="metric-item-large">
+            <span class="metric-label-large">Median Items per User:</span>
+            <span class="metric-value-large">${data.median.toFixed(2)}</span>
+        </div>
+    `;
+
+    container.appendChild(metricsDiv);
+}
+
+function renderQuery8(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Unique Items per User';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+
+    const table = document.createElement('table');
+    table.className = 'unique-items-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>User ID</th>
+        <th>Artists</th>
+        <th>Songs</th>
+        <th>Albums</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.user_id}</td>
+            <td>${item.artists.toLocaleString()}</td>
+            <td>${item.songs.toLocaleString()}</td>
+            <td>${item.albums.toLocaleString()}</td>
+        `;
+        table.appendChild(row);
+    });
+
+    tableContainer.appendChild(table);
+    container.appendChild(tableContainer);
+}
+
+function renderQuery9(containerId, data, title) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = title;
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+
+    const table = document.createElement('table');
+    table.className = 'query9-table';
+
+    const headerRow = document.createElement('tr');
+    if (title.includes('Artists')) {
+        headerRow.innerHTML = `
+            <th>Artist 1</th>
+            <th>Artist 2</th>
+            <th>Artist 3</th>
+            <th>Total Users</th>
+        `;
+    } else if (title.includes('Albums')) {
+        headerRow.innerHTML = `
+            <th>Album 1</th>
+            <th>Album 2</th>
+            <th>Album 3</th>
+            <th>Total Users</th>
+        `;
+    } else {
+        headerRow.innerHTML = `
+            <th>Song 1</th>
+            <th>Song 2</th>
+            <th>Song 3</th>
+            <th>Total Users</th>
+        `;
+    }
+    table.appendChild(headerRow);
+
+    data.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const item1 = title.includes('Artists') ? item.artist1 : title.includes('Albums') ? item.album1 : item.song1;
+        const item2 = title.includes('Artists') ? item.artist2 : title.includes('Albums') ? item.album2 : item.song2;
+        const item3 = title.includes('Artists') ? item.artist3 : title.includes('Albums') ? item.album3 : item.song3;
+        
+        row.innerHTML = `
+            <td>${truncateText(item1, 30)}</td>
+            <td>${truncateText(item2, 30)}</td>
+            <td>${truncateText(item3, 30)}</td>
+            <td>${item.total_users.toLocaleString()}</td>
+        `;
+        table.appendChild(row);
+    });
+
+    tableContainer.appendChild(table);
+    container.appendChild(tableContainer);
+}
+
+function renderQuery10(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Loyal listeners';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.value === undefined) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const loyalDiv = document.createElement('div');
+    loyalDiv.className = 'loyal-listeners';
+
+    loyalDiv.innerHTML = `
+        <div class="loyal-value">${data.value.toLocaleString()}</div>
+        <div class="loyal-label">users are loyal to their top artist</div>
+    `;
+
+    container.appendChild(loyalDiv);
+}
+
+// ============ TAB 3: CONCURRENCY AND POSITIONS ============
+
+async function loadTab3Data() {
+    try {
+        const [
+            pairedArtists,
+            trioArtists,
+            overlap, 
+            avgPosition, 
+            top5Correlation, 
+            sameTop1Top2
+        ] = await Promise.all([
+            fetch('/api/paired-artists').then(res => res.json()),
+            fetch('/api/trio-artists').then(res => res.json()),
+            fetch('/api/artist-song-overlap').then(res => res.json()),
+            fetch('/api/average-artist-position').then(res => res.json()),
+            fetch('/api/top5-correlation').then(res => res.json()),
+            fetch('/api/same-top1-top2').then(res => res.json())
+        ]);
+
+        renderQuery11('query11-container', pairedArtists);
+        renderQuery12('query12-container', trioArtists);
+        renderQuery13('query13-container', overlap);
+        renderQuery14('query14-container', avgPosition);
+        renderQuery15('query15-container', top5Correlation);
+        renderQuery16('query16-container', sameTop1Top2);
+    } catch (error) {
+        console.error('Error loading tab 3 data:', error);
+    }
+}
+
+function renderQuery11(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Top 50 Paired Artists';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+
+    const table = document.createElement('table');
+    table.className = 'pairs-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Artist 1</th>
+        <th>Artist 2</th>
+        <th>Total Users</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${truncateText(item.artist1, 40)}</td>
+            <td>${truncateText(item.artist2, 40)}</td>
+            <td>${item.total_users.toLocaleString()}</td>
+        `;
+        table.appendChild(row);
+    });
+
+    tableContainer.appendChild(table);
+    container.appendChild(tableContainer);
+}
+
+function renderQuery12(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Top 20 Trio Artists';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+
+    const table = document.createElement('table');
+    table.className = 'triplets-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Artist 1</th>
+        <th>Artist 2</th>
+        <th>Artist 3</th>
+        <th>Total Users</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${truncateText(item.artist1, 30)}</td>
+            <td>${truncateText(item.artist2, 30)}</td>
+            <td>${truncateText(item.artist3, 30)}</td>
+            <td>${item.total_users.toLocaleString()}</td>
+        `;
+        table.appendChild(row);
+    });
+
+    tableContainer.appendChild(table);
+    container.appendChild(tableContainer);
+}
+
+function renderQuery13(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Artist-song overlap';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.value === undefined) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const numberDiv = document.createElement('div');
+    numberDiv.className = 'single-value-display';
+
+    const valueElement = document.createElement('div');
+    valueElement.className = 'single-value-number';
+    valueElement.textContent = data.value.toLocaleString();
+
+    const labelElement = document.createElement('div');
+    labelElement.className = 'single-value-label';
+    labelElement.textContent = 'artist-song overlaps';
+
+    numberDiv.appendChild(valueElement);
+    numberDiv.appendChild(labelElement);
+    container.appendChild(numberDiv);
+}
+
+function renderQuery14(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Average artist position';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const barSection = document.createElement('div');
+    barSection.className = 'bar-section';
+
+    const maxAverage = Math.max(...data.map(item => item.average));
+    
+    data.forEach((item, index) => {
+        const barItem = document.createElement('div');
+        barItem.className = 'bar-item';
+
+        const barLabel = document.createElement('span');
+        barLabel.className = 'bar-label';
+        barLabel.textContent = item.name.length > 25 ? item.name.substring(0, 25) + '...' : item.name;
+        barLabel.title = item.name;
+
+        const barContainer = document.createElement('div');
+        barContainer.className = 'bar-container';
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.width = `${(item.average / maxAverage) * 100}%`;
+
+        const barValue = document.createElement('span');
+        barValue.className = 'bar-value';
+        barValue.textContent = item.average.toFixed(2);
+
+        barContainer.appendChild(bar);
+        barContainer.appendChild(barValue);
+        barItem.appendChild(barLabel);
+        barItem.appendChild(barContainer);
+        barSection.appendChild(barItem);
+    });
+
+    container.appendChild(barSection);
+}
+
+function renderQuery15(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Top 5 correlation of top per user amount';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const barSection = document.createElement('div');
+    barSection.className = 'bar-section';
+
+    const maxUsers = Math.max(...data.map(item => item.users));
+    
+    data.forEach((item, index) => {
+        const barItem = document.createElement('div');
+        barItem.className = 'bar-item';
+
+        const barLabel = document.createElement('span');
+        barLabel.className = 'bar-label';
+        barLabel.textContent = item.name.length > 25 ? item.name.substring(0, 25) + '...' : item.name;
+        barLabel.title = item.name;
+
+        const barContainer = document.createElement('div');
+        barContainer.className = 'bar-container';
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.width = `${(item.users / maxUsers) * 100}%`;
+
+        const barValue = document.createElement('span');
+        barValue.className = 'bar-value';
+        barValue.textContent = item.users.toLocaleString();
+
+        barContainer.appendChild(bar);
+        barContainer.appendChild(barValue);
+        barItem.appendChild(barLabel);
+        barItem.appendChild(barContainer);
+        barSection.appendChild(barItem);
+    });
+
+    container.appendChild(barSection);
+}
+
+function renderQuery16(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Users with same top 1 and 2 artists';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'stats-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Top 1 Artist</th>
+        <th>Top 2 Artist</th>
+        <th>Users</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach(item => {
+        const dataRow = document.createElement('tr');
+        dataRow.innerHTML = `
+            <td>${item.artist1}</td>
+            <td>${item.artist2}</td>
+            <td>${item.users.toLocaleString()}</td>
+        `;
+        table.appendChild(dataRow);
+    });
+
+    container.appendChild(table);
+}
+
+// ============ TAB 4: SIMPLE COMPARISONS ============
+
+async function loadTab4Data() {
+    try {
+        const [topArtistsListeners, crossedPopularity, diverseArtists] = await Promise.all([
+            fetch('/api/top-artists-listeners').then(res => res.json()),
+            fetch('/api/crossed-popularity').then(res => res.json()),
+            fetch('/api/diverse-artists').then(res => res.json())
+        ]);
+
+        renderQuery18('query18-container', topArtistsListeners);
+        renderQuery19('query19-container', crossedPopularity);
+        renderQuery20('query20-container', diverseArtists);
+    } catch (error) {
+        console.error('Error loading tab 4 data:', error);
+    }
+}
+
+function renderQuery18(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Top artists among listeners';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'stats-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Ranking</th>
+        <th>Artist Name</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach(item => {
+        const dataRow = document.createElement('tr');
+        dataRow.innerHTML = `
+            <td>${item.ranking}</td>
+            <td>${item.name}</td>
+        `;
+        table.appendChild(dataRow);
+    });
+
+    container.appendChild(table);
+}
+
+function renderQuery19(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Crossed popularity between charts';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'stats-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Artist</th>
+        <th>Song Frequency</th>
+        <th>Artist Frequency</th>
+        <th>Difference</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach(item => {
+        const dataRow = document.createElement('tr');
+        dataRow.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.song_frequency.toLocaleString()}</td>
+            <td>${item.artist_frequency.toLocaleString()}</td>
+            <td>${item.difference.toLocaleString()}</td>
+        `;
+        table.appendChild(dataRow);
+    });
+
+    container.appendChild(table);
+}
+
+function renderQuery20(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Diverse artists';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.length === 0) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'stats-table';
+
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>Artist</th>
+        <th>Listeners</th>
+        <th>Songs</th>
+    `;
+    table.appendChild(headerRow);
+
+    data.forEach(item => {
+        const dataRow = document.createElement('tr');
+        dataRow.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.listeners.toLocaleString()}</td>
+            <td>${item.songs.toLocaleString()}</td>
+        `;
+        table.appendChild(dataRow);
+    });
+
+    container.appendChild(table);
+}
+
+// ============ TAB 5: QUALITY ============
+
+async function loadTab5Data() {
+    try {
+        const [missingData, atypicalUsers, lowCoverageCount, lowCoverageArtists] = await Promise.all([
+            fetch('/api/missing-data').then(res => res.json()),
+            fetch('/api/atypical-users').then(res => res.json()),
+            fetch('/api/low-coverage-count').then(res => res.json()),
+            fetch('/api/low-coverage-artists').then(res => res.json())
+        ]);
+
+        renderQuery21('query21-container', missingData);
+        renderQuery22('query22-container', atypicalUsers);
+        renderQuery23('query23-container', lowCoverageCount, lowCoverageArtists);
+    } catch (error) {
+        console.error('Error loading tab 5 data:', error);
+    }
+}
+
+function renderQuery21(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Count of missing data';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.value === undefined) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const numberDiv = document.createElement('div');
+    numberDiv.className = 'single-value-display';
+
+    const valueElement = document.createElement('div');
+    valueElement.className = 'single-value-number';
+    valueElement.textContent = data.value.toLocaleString();
+
+    const labelElement = document.createElement('div');
+    labelElement.className = 'single-value-label';
+    labelElement.textContent = 'users with missing data';
+
+    numberDiv.appendChild(valueElement);
+    numberDiv.appendChild(labelElement);
+    container.appendChild(numberDiv);
+}
+
+function renderQuery22(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Count of atypical users';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (!data || data.value === undefined) {
+        container.innerHTML += '<p>No data available</p>';
+        return;
+    }
+
+    const numberDiv = document.createElement('div');
+    numberDiv.className = 'single-value-display';
+
+    const valueElement = document.createElement('div');
+    valueElement.className = 'single-value-number';
+    valueElement.textContent = data.value.toLocaleString();
+
+    const labelElement = document.createElement('div');
+    labelElement.className = 'single-value-label';
+    labelElement.textContent = 'atypical users';
+
+    numberDiv.appendChild(valueElement);
+    numberDiv.appendChild(labelElement);
+    container.appendChild(numberDiv);
+}
+
+function renderQuery23(containerId, countData, artistsData) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const titleElement = document.createElement('h2');
+    titleElement.textContent = 'Low coverage artists';
+    titleElement.className = 'chart-title';
+    container.appendChild(titleElement);
+
+    if (countData && countData.value !== undefined) {
+        const countDiv = document.createElement('div');
+        countDiv.className = 'single-value-display';
+
+        const valueElement = document.createElement('div');
+        valueElement.className = 'single-value-number';
+        valueElement.textContent = countData.value.toLocaleString();
+
+        const labelElement = document.createElement('div');
+        labelElement.className = 'single-value-label';
+        labelElement.textContent = 'artists with low coverage (< 5 mentions)';
+
+        countDiv.appendChild(valueElement);
+        countDiv.appendChild(labelElement);
+        container.appendChild(countDiv);
+    }
+
+    if (artistsData && artistsData.length > 0) {
+        const barSection = document.createElement('div');
+        barSection.className = 'bar-section';
+        barSection.style.marginTop = '2em';
+
+        const maxAppearances = Math.max(...artistsData.map(item => item.appearances));
+        
+        artistsData.forEach((item, index) => {
+            const barItem = document.createElement('div');
+            barItem.className = 'bar-item';
+
+            const barLabel = document.createElement('span');
+            barLabel.className = 'bar-label';
+            barLabel.textContent = item.name.length > 25 ? item.name.substring(0, 25) + '...' : item.name;
+            barLabel.title = item.name;
+
+            const barContainer = document.createElement('div');
+            barContainer.className = 'bar-container';
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.width = `${(item.appearances / maxAppearances) * 100}%`;
+
+            const barValue = document.createElement('span');
+            barValue.className = 'bar-value';
+            barValue.textContent = item.appearances.toLocaleString();
+
+            barContainer.appendChild(bar);
+            barContainer.appendChild(barValue);
+            barItem.appendChild(barLabel);
+            barItem.appendChild(barContainer);
+            barSection.appendChild(barItem);
+        });
+
+        container.appendChild(barSection);
+    }
+}
+
+// ============ UTILITY FUNCTIONS ============
+
 function setupPieChartHover(pieChartId, data) {
     const pieChart = document.getElementById(pieChartId);
     if (!pieChart) return;
@@ -366,323 +1159,6 @@ function setupPieChartHover(pieChartId, data) {
     });
 }
 
-// Load data for Tab 2 (Queries 7-10)
-async function loadTab2Data() {
-    try {
-        const [
-            itemsMetrics,
-            uniqueItems,
-            duplicatedArtists,
-            duplicatedAlbums,
-            duplicatedSongs,
-            loyalListeners
-        ] = await Promise.all([
-            fetch('/api/items-per-user-metrics').then(res => res.json()),
-            fetch('/api/unique-items').then(res => res.json()),
-            fetch('/api/duplicated-artists').then(res => res.json()),
-            fetch('/api/duplicated-albums').then(res => res.json()),
-            fetch('/api/duplicated-songs').then(res => res.json()),
-            fetch('/api/loyal-listeners').then(res => res.json())
-        ]);
-
-        renderQuery7('query7-container', itemsMetrics);
-        renderQuery8('query8-container', uniqueItems);
-        renderQuery9('query9-artists-container', duplicatedArtists, 'Top 10 Duplicated Artists');
-        renderQuery9('query9-albums-container', duplicatedAlbums, 'Top 10 Duplicated Albums');
-        renderQuery9('query9-songs-container', duplicatedSongs, 'Top 10 Duplicated Songs');
-        renderQuery10('query10-container', loyalListeners);
-    } catch (error) {
-        console.error('Error loading tab 2 data:', error);
-    }
-}
-
-// Load data for Tab 3 (Queries 11-12)
-async function loadTab3Data() {
-    try {
-        const [
-            pairedArtists,
-            trioArtists
-        ] = await Promise.all([
-            fetch('/api/paired-artists').then(res => res.json()),
-            fetch('/api/trio-artists').then(res => res.json())
-        ]);
-
-        renderQuery11('query11-container', pairedArtists);
-        renderQuery12('query12-container', trioArtists);
-    } catch (error) {
-        console.error('Error loading tab 3 data:', error);
-    }
-}
-
-// Query 7: Items per user
-function renderQuery7(containerId, data) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = 'Items per user';
-    titleElement.className = 'chart-title';
-    container.appendChild(titleElement);
-
-    if (!data || data.average === undefined) {
-        container.innerHTML += '<p>No data available</p>';
-        return;
-    }
-
-    const metricsDiv = document.createElement('div');
-    metricsDiv.className = 'simple-metrics';
-
-    metricsDiv.innerHTML = `
-        <div class="metric-item-large">
-            <span class="metric-label-large">Average Items per User:</span>
-            <span class="metric-value-large">${data.average.toFixed(2)}</span>
-        </div>
-        <div class="metric-item-large">
-            <span class="metric-label-large">Median Items per User:</span>
-            <span class="metric-value-large">${data.median.toFixed(2)}</span>
-        </div>
-    `;
-
-    container.appendChild(metricsDiv);
-}
-
-// Query 8: Unique Items
-function renderQuery8(containerId, data) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = 'Unique Items per User';
-    titleElement.className = 'chart-title';
-    container.appendChild(titleElement);
-
-    if (!data || data.length === 0) {
-        container.innerHTML += '<p>No data available</p>';
-        return;
-    }
-
-    const tableContainer = document.createElement('div');
-    tableContainer.className = 'table-container';
-
-    const table = document.createElement('table');
-    table.className = 'unique-items-table';
-
-    const headerRow = document.createElement('tr');
-    headerRow.innerHTML = `
-        <th>User ID</th>
-        <th>Artists</th>
-        <th>Songs</th>
-        <th>Albums</th>
-    `;
-    table.appendChild(headerRow);
-
-    data.forEach((item, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${item.user_id}</td>
-            <td>${item.artists.toLocaleString()}</td>
-            <td>${item.songs.toLocaleString()}</td>
-            <td>${item.albums.toLocaleString()}</td>
-        `;
-        table.appendChild(row);
-    });
-
-    tableContainer.appendChild(table);
-    container.appendChild(tableContainer);
-}
-
-// Query 9: Duplicated items (artists, albums, songs)
-function renderQuery9(containerId, data, title) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = title;
-    titleElement.className = 'chart-title';
-    container.appendChild(titleElement);
-
-    if (!data || data.length === 0) {
-        container.innerHTML += '<p>No data available</p>';
-        return;
-    }
-
-    const tableContainer = document.createElement('div');
-    tableContainer.className = 'table-container';
-
-    const table = document.createElement('table');
-    table.className = 'query9-table'; // Changed from triplets-table to query9-table
-
-    const headerRow = document.createElement('tr');
-    if (title.includes('Artists')) {
-        headerRow.innerHTML = `
-            <th>Artist 1</th>
-            <th>Artist 2</th>
-            <th>Artist 3</th>
-            <th>Total Users</th>
-        `;
-    } else if (title.includes('Albums')) {
-        headerRow.innerHTML = `
-            <th>Album 1</th>
-            <th>Album 2</th>
-            <th>Album 3</th>
-            <th>Total Users</th>
-        `;
-    } else {
-        headerRow.innerHTML = `
-            <th>Song 1</th>
-            <th>Song 2</th>
-            <th>Song 3</th>
-            <th>Total Users</th>
-        `;
-    }
-    table.appendChild(headerRow);
-
-    data.forEach((item, index) => {
-        const row = document.createElement('tr');
-        const item1 = title.includes('Artists') ? item.artist1 : title.includes('Albums') ? item.album1 : item.song1;
-        const item2 = title.includes('Artists') ? item.artist2 : title.includes('Albums') ? item.album2 : item.song2;
-        const item3 = title.includes('Artists') ? item.artist3 : title.includes('Albums') ? item.album3 : item.song3;
-        
-        row.innerHTML = `
-            <td>${truncateText(item1, 30)}</td>
-            <td>${truncateText(item2, 30)}</td>
-            <td>${truncateText(item3, 30)}</td>
-            <td>${item.total_users.toLocaleString()}</td>
-        `;
-        table.appendChild(row);
-    });
-
-    tableContainer.appendChild(table);
-    container.appendChild(tableContainer);
-}
-
-// Query 10: Loyal listeners
-function renderQuery10(containerId, data) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = 'Loyal listeners';
-    titleElement.className = 'chart-title';
-    container.appendChild(titleElement);
-
-    if (!data || data.value === undefined) {
-        container.innerHTML += '<p>No data available</p>';
-        return;
-    }
-
-    const loyalDiv = document.createElement('div');
-    loyalDiv.className = 'loyal-listeners';
-
-    loyalDiv.innerHTML = `
-        <div class="loyal-value">${data.value.toLocaleString()}</div>
-        <div class="loyal-label">users are loyal to their top artist</div>
-    `;
-
-    container.appendChild(loyalDiv);
-}
-
-// Query 11: Paired artists
-function renderQuery11(containerId, data) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = 'Top 50 Paired Artists';
-    titleElement.className = 'chart-title';
-    container.appendChild(titleElement);
-
-    if (!data || data.length === 0) {
-        container.innerHTML += '<p>No data available</p>';
-        return;
-    }
-
-    const tableContainer = document.createElement('div');
-    tableContainer.className = 'table-container';
-
-    const table = document.createElement('table');
-    table.className = 'pairs-table';
-
-    const headerRow = document.createElement('tr');
-    headerRow.innerHTML = `
-        <th>Artist 1</th>
-        <th>Artist 2</th>
-        <th>Total Users</th>
-    `;
-    table.appendChild(headerRow);
-
-    data.forEach((item, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${truncateText(item.artist1, 40)}</td>
-            <td>${truncateText(item.artist2, 40)}</td>
-            <td>${item.total_users.toLocaleString()}</td>
-        `;
-        table.appendChild(row);
-    });
-
-    tableContainer.appendChild(table);
-    container.appendChild(tableContainer);
-}
-
-// Query 12: Trio artists
-function renderQuery12(containerId, data) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = 'Top 20 Trio Artists';
-    titleElement.className = 'chart-title';
-    container.appendChild(titleElement);
-
-    if (!data || data.length === 0) {
-        container.innerHTML += '<p>No data available</p>';
-        return;
-    }
-
-    const tableContainer = document.createElement('div');
-    tableContainer.className = 'table-container';
-
-    const table = document.createElement('table');
-    table.className = 'triplets-table';
-
-    const headerRow = document.createElement('tr');
-    headerRow.innerHTML = `
-        <th>Artist 1</th>
-        <th>Artist 2</th>
-        <th>Artist 3</th>
-        <th>Total Users</th>
-    `;
-    table.appendChild(headerRow);
-
-    data.forEach((item, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${truncateText(item.artist1, 30)}</td>
-            <td>${truncateText(item.artist2, 30)}</td>
-            <td>${truncateText(item.artist3, 30)}</td>
-            <td>${item.total_users.toLocaleString()}</td>
-        `;
-        table.appendChild(row);
-    });
-
-    tableContainer.appendChild(table);
-    container.appendChild(tableContainer);
-}
-
-// Helper function to truncate long text
 function truncateText(text, maxLength) {
     if (text.length > maxLength) {
         return text.substring(0, maxLength) + '...';

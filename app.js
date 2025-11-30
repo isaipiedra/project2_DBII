@@ -8,7 +8,8 @@ const port = 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// API endpoint for Top 20 General Artists
+// ============ TAB 1: POPULARITY AND FREQUENCY ============
+
 app.get('/api/top-artists', async (req, res) => {
     try {
         const sql = `
@@ -25,7 +26,6 @@ app.get('/api/top-artists', async (req, res) => {
     }
 });
 
-// API endpoint for Top 20 General Songs
 app.get('/api/top-songs', async (req, res) => {
     try {
         const sql = `
@@ -42,7 +42,6 @@ app.get('/api/top-songs', async (req, res) => {
     }
 });
 
-// API endpoint for Top 20 General Albums
 app.get('/api/top-albums', async (req, res) => {
     try {
         const sql = `
@@ -59,7 +58,6 @@ app.get('/api/top-albums', async (req, res) => {
     }
 });
 
-// API endpoint for Query 4 - Same Top One Artist
 app.get('/api/same-top-artist', async (req, res) => {
     try {
         const sql = `
@@ -77,7 +75,6 @@ app.get('/api/same-top-artist', async (req, res) => {
     }
 });
 
-// API endpoint for Query 5 - Mentions Per Artist
 app.get('/api/mentions-artist', async (req, res) => {
     try {
         const sql = `
@@ -95,7 +92,6 @@ app.get('/api/mentions-artist', async (req, res) => {
     }
 });
 
-// API endpoint for Query 5 - Metrics
 app.get('/api/mentions-metrics', async (req, res) => {
     try {
         const sql = `
@@ -111,7 +107,6 @@ app.get('/api/mentions-metrics', async (req, res) => {
     }
 });
 
-// API endpoint for Query 6 - Long Tail
 app.get('/api/long-tail', async (req, res) => {
     try {
         const sql = `
@@ -127,7 +122,8 @@ app.get('/api/long-tail', async (req, res) => {
     }
 });
 
-// API endpoint for Query 7 - Items per user metrics
+// ============ TAB 2: SIMPLE COUNTS BY USER ============
+
 app.get('/api/items-per-user-metrics', async (req, res) => {
     try {
         const sql = `
@@ -143,7 +139,6 @@ app.get('/api/items-per-user-metrics', async (req, res) => {
     }
 });
 
-// API endpoint for Query 8 - Unique Items
 app.get('/api/unique-items', async (req, res) => {
     try {
         const sql = `
@@ -160,7 +155,6 @@ app.get('/api/unique-items', async (req, res) => {
     }
 });
 
-// API endpoint for Query 9.1 - Top 10 duplicated artists
 app.get('/api/duplicated-artists', async (req, res) => {
     try {
         const sql = `
@@ -179,7 +173,6 @@ app.get('/api/duplicated-artists', async (req, res) => {
     }
 });
 
-// API endpoint for Query 9.2 - Top 10 duplicated albums
 app.get('/api/duplicated-albums', async (req, res) => {
     try {
         const sql = `
@@ -198,7 +191,6 @@ app.get('/api/duplicated-albums', async (req, res) => {
     }
 });
 
-// API endpoint for Query 9.3 - Top 10 duplicated songs
 app.get('/api/duplicated-songs', async (req, res) => {
     try {
         const sql = `
@@ -217,7 +209,6 @@ app.get('/api/duplicated-songs', async (req, res) => {
     }
 });
 
-// API endpoint for Query 10 - Loyal listeners
 app.get('/api/loyal-listeners', async (req, res) => {
     try {
         const sql = `
@@ -233,7 +224,6 @@ app.get('/api/loyal-listeners', async (req, res) => {
     }
 });
 
-// API endpoint for Query 11 - Top 50 paired artists
 app.get('/api/paired-artists', async (req, res) => {
     try {
         const sql = `
@@ -251,7 +241,6 @@ app.get('/api/paired-artists', async (req, res) => {
     }
 });
 
-// API endpoint for Query 12 - Top 20 trio artists
 app.get('/api/trio-artists', async (req, res) => {
     try {
         const sql = `
@@ -270,11 +259,185 @@ app.get('/api/trio-artists', async (req, res) => {
     }
 });
 
-/**
- * Starts the server and initializes database connection
- * @function start_server
- * @returns {void}
- */
+// ============ TAB 3: CONCURRENCY AND POSITIONS ============
+
+app.get('/api/artist-song-overlap', async (req, res) => {
+    try {
+        const sql = `
+            SELECT value 
+            FROM metrics.Single_Value_Queries
+            WHERE query = 13
+        `;
+        const results = await executeQuery(sql);
+        res.json(results[0] || {});
+    } catch (error) {
+        console.error('Error fetching artist-song overlap:', error);
+        res.status(500).json({ error: 'Failed to fetch artist-song overlap' });
+    }
+});
+
+app.get('/api/average-artist-position', async (req, res) => {
+    try {
+        const sql = `
+            SELECT art.name, pos.average
+            FROM metrics.Average_Artist_Position pos
+            JOIN metrics.Artists art ON pos.artist_id = art.id
+            ORDER BY pos.average DESC
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching average artist position:', error);
+        res.status(500).json({ error: 'Failed to fetch average artist position' });
+    }
+});
+
+app.get('/api/top5-correlation', async (req, res) => {
+    try {
+        const sql = `
+            SELECT art.name, top.users
+            FROM metrics.Global_Top_5_Correlates_Top_Per_User top
+            JOIN metrics.Artists art ON top.artist_id = art.id
+            ORDER BY top.users DESC
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching top 5 correlation:', error);
+        res.status(500).json({ error: 'Failed to fetch top 5 correlation' });
+    }
+});
+
+app.get('/api/same-top1-top2', async (req, res) => {
+    try {
+        const sql = `
+            SELECT art_1.name as artist1, art_2.name as artist2, top.users 
+            FROM metrics.Same_Top_1_And_2 top
+            JOIN metrics.Artists art_1 ON top.id_artist_position_1 = art_1.id
+            JOIN metrics.Artists art_2 ON top.id_artist_position_2 = art_2.id
+            ORDER BY top.users DESC
+            LIMIT 100
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching same top 1 and 2 artists:', error);
+        res.status(500).json({ error: 'Failed to fetch same top 1 and 2 artists' });
+    }
+});
+
+// ============ TAB 4: SIMPLE COMPARISONS ============
+
+app.get('/api/top-artists-listeners', async (req, res) => {
+    try {
+        const sql = `
+            SELECT top.ranking, art.name 
+            FROM metrics.Top_Artists_In_Between_Listeners top
+            JOIN metrics.Artists art ON top.artist_id = art.id
+            ORDER BY top.ranking
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching top artists among listeners:', error);
+        res.status(500).json({ error: 'Failed to fetch top artists among listeners' });
+    }
+});
+
+app.get('/api/crossed-popularity', async (req, res) => {
+    try {
+        const sql = `
+            SELECT art.name, crs.song_frequency, crs.artist_frequency, crs.difference 
+            FROM metrics.Cross_Popularity crs
+            JOIN metrics.Artists art ON crs.artist_id = art.id
+            ORDER BY crs.difference DESC
+            LIMIT 100
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching crossed popularity:', error);
+        res.status(500).json({ error: 'Failed to fetch crossed popularity' });
+    }
+});
+
+app.get('/api/diverse-artists', async (req, res) => {
+    try {
+        const sql = `
+            SELECT art.name, dv.listeners, dv.songs 
+            FROM metrics.Diverse_Artists dv
+            JOIN metrics.Artists art ON dv.artist_id = art.id
+            ORDER BY dv.listeners DESC
+            LIMIT 100
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching diverse artists:', error);
+        res.status(500).json({ error: 'Failed to fetch diverse artists' });
+    }
+});
+
+// ============ TAB 5: QUALITY ============
+
+app.get('/api/missing-data', async (req, res) => {
+    try {
+        const sql = `
+            SELECT value FROM metrics.Single_Value_Queries WHERE query = 21
+        `;
+        const results = await executeQuery(sql);
+        res.json(results[0] || {});
+    } catch (error) {
+        console.error('Error fetching missing data count:', error);
+        res.status(500).json({ error: 'Failed to fetch missing data count' });
+    }
+});
+
+app.get('/api/atypical-users', async (req, res) => {
+    try {
+        const sql = `
+            SELECT value FROM metrics.Single_Value_Queries WHERE query = 22
+        `;
+        const results = await executeQuery(sql);
+        res.json(results[0] || {});
+    } catch (error) {
+        console.error('Error fetching atypical users count:', error);
+        res.status(500).json({ error: 'Failed to fetch atypical users count' });
+    }
+});
+
+app.get('/api/low-coverage-count', async (req, res) => {
+    try {
+        const sql = `
+            SELECT value FROM metrics.Single_Value_Queries WHERE query = 23
+        `;
+        const results = await executeQuery(sql);
+        res.json(results[0] || {});
+    } catch (error) {
+        console.error('Error fetching low coverage count:', error);
+        res.status(500).json({ error: 'Failed to fetch low coverage count' });
+    }
+});
+
+app.get('/api/low-coverage-artists', async (req, res) => {
+    try {
+        const sql = `
+            SELECT art.name, low.appearances
+            FROM metrics.Low_Coverage_Artists low
+            JOIN metrics.Artists art ON low.artist_id = art.id
+            ORDER BY low.appearances
+            LIMIT 100
+        `;
+        const results = await executeQuery(sql);
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching low coverage artists:', error);
+        res.status(500).json({ error: 'Failed to fetch low coverage artists' });
+    }
+});
+
+// ============ SERVER INITIALIZATION ============
+
 async function start_server() {
     try {
         app.listen(port, () => {
