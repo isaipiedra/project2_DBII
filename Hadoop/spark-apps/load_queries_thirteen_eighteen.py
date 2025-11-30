@@ -29,8 +29,7 @@ df13 = load_parquet("q13_artist_song_overlap") \
     .withColumn("query", F.lit(13)) \
     .select("query", "value")
 
-# Overwrite or upsert: here we overwrite entire table content for simplicity
-df13.write.mode("overwrite").jdbc(mysql_url, "Single_Value_Queries", properties=mysql_props)
+df13.write.mode("append").jdbc(mysql_url, "Single_Value_Queries", properties=mysql_props)
 print("Uploaded Query 13 -> Single_Value_Queries")
 
 # -------------------------
