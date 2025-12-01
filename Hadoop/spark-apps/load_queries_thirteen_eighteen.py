@@ -29,8 +29,30 @@ df13 = load_parquet("q13_artist_song_overlap") \
     .withColumn("query", F.lit(13)) \
     .select("query", "value")
 
-df13.write.mode("append").jdbc(mysql_url, "Single_Value_Queries", properties=mysql_props)
-print("Uploaded Query 13 -> Single_Value_Queries")
+# Check if query 13 already exists in the table
+existing_df = spark.read.jdbc(mysql_url, "Single_Value_Queries", properties=mysql_props)
+existing_query_13 = existing_df.filter(F.col("query") == 13)
+
+if existing_query_13.count() > 0:
+    # Update existing record
+    print("Query 13 already exists in Single_Value_Queries, updating...")
+    # First delete the existing record for query 13
+    from pyspark.sql import DataFrame
+    import sys
+    
+    # Create a temporary table with all records except query 13
+    other_queries = existing_df.filter(F.col("query") != 13)
+    
+    # Combine with new query 13 data
+    combined_df = other_queries.union(df13)
+    
+    # Overwrite the entire table with the combined data
+    combined_df.write.mode("overwrite").jdbc(mysql_url, "Single_Value_Queries", properties=mysql_props)
+    print("Updated Query 13 in Single_Value_Queries")
+else:
+    # Append new record
+    df13.write.mode("append").jdbc(mysql_url, "Single_Value_Queries", properties=mysql_props)
+    print("Added Query 13 to Single_Value_Queries")
 
 # -------------------------
 # Query 14 -> Average_Artist_Position (artist_id PRIMARY KEY, average DOUBLE)

@@ -283,6 +283,7 @@ app.get('/api/average-artist-position', async (req, res) => {
             FROM metrics.Average_Artist_Position pos
             JOIN metrics.Artists art ON pos.artist_id = art.id
             ORDER BY pos.average DESC
+            LIMIT 100
         `;
         const results = await executeQuery(sql);
         res.json(results);
