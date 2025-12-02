@@ -149,7 +149,6 @@ def q5_mentions_per_artist(spark):
     return spark.sql(sql_query)
 
 def q5_calculate_metrics(spark, df_q5):
-    # More accurate median calculation using window functions
     window_spec = Window.orderBy("mentions")
     
     median_df = df_q5.withColumn("row_num", F.row_number().over(window_spec)) \
@@ -158,12 +157,10 @@ def q5_calculate_metrics(spark, df_q5):
     total_count = df_q5.count()
     
     if total_count % 2 == 0:
-        # Even number of elements - average of two middle values
         median_val = median_df.filter(
             (F.col("row_num") == total_count // 2) | (F.col("row_num") == total_count // 2 + 1)
         ).agg(F.avg("mentions")).collect()[0][0]
     else:
-        # Odd number of elements - middle value
         median_val = median_df.filter(F.col("row_num") == (total_count + 1) // 2) \
                             .select("mentions").collect()[0]["mentions"]
     
@@ -264,7 +261,7 @@ def main():
     metrics_df.write.mode("overwrite").parquet("/opt/spark-apps/music_results/q_metrics")
     single_value_df.write.mode("overwrite").parquet("/opt/spark-apps/music_results/q_single_values")
     
-    print("✅ All queries 1-6 completed and saved as Parquet files")
+    print("All queries 1-6 completed and saved as Parquet files")
     
     spark.stop()
 
