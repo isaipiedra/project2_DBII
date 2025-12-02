@@ -392,7 +392,7 @@ def main():
 
     load_tables(spark)
 
-    """ 
+
     spark = SparkSession.builder \
         .appName("Upload Music Results to MySQL") \
         .config("spark.driver.memory", "4g") \
@@ -518,7 +518,7 @@ def main():
 
     df12.write.mode("overwrite").jdbc(mysql_url, "top_20_Trio_Artists", properties=mysql_props)
 
-    """
+    
    #Insertar promedios, media y desviación estándar
     df_metrics = q_avg_med_std(spark)
     df_metrics.show()
