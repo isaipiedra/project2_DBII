@@ -3,9 +3,7 @@ from pyspark.sql.functions import (
     col, trim, lower, sha2, concat_ws, when
 )
 
-# =========================================
-# 1. Spark Session
-# =========================================
+# Sesión de spark
 spark = SparkSession.builder \
     .appName("MusicDW Loader - SHA256 SAFE") \
     .config("spark.sql.shuffle.partitions", "8") \
@@ -16,36 +14,27 @@ spark = SparkSession.builder \
 RAW = "hdfs://namenode:9000/music_raw/"
 DW  = "hdfs://namenode:9000/music_dw/"
 
-# =========================================
-# 2. Generadores de Keys — ZERO pérdida
-# =========================================
-
-# Key de artista basada en su nombre EXACTO
+# Generadores de keys unicos con el artista usando sha256
 def artist_key(col_name):
     return sha2(trim(lower(col(col_name))), 256)
 
-# Key de track: combinación track_name + artist_name
 def track_key():
     return sha2(concat_ws("::",
             trim(lower(col("track_name"))),
             trim(lower(col("artist_name")))
         ), 256)
 
-# Key de álbum: combinación album_name + artist_name
 def album_key():
     return sha2(concat_ws("::",
             trim(lower(col("album_name"))),
             trim(lower(col("artist_name")))
         ), 256)
 
-# Verifica que playcount sea número
 def clean_playcount(c):
     return when(col(c).rlike("^[0-9]+$"), col(c).cast("bigint")).otherwise(None)
 
 
-# =========================================
-# 3. Cargar los CSV (sin limpiar nombres)
-# =========================================
+# Cargar tablas del CSV
 users_raw = spark.read.csv(RAW + "users.csv", header=True, inferSchema=True)
 
 artists_raw = spark.read.csv(RAW + "user_top_artists.csv", header=True, inferSchema=True) \
@@ -63,10 +52,7 @@ albums_raw = spark.read.csv(RAW + "user_top_albums.csv", header=True, inferSchem
     .withColumn("playcount", clean_playcount("playcount"))
 
 
-# =========================================
-# 4. Dimensiones (cada entidad única)
-# =========================================
-
+# tablas de dimensiones
 dim_artist = (
     artists_raw.select("artist_key", "artist_name")
     .union(tracks_raw.select("artist_key", "artist_name"))
@@ -91,10 +77,7 @@ dim_album = (
 dim_user = users_raw.select("user_id", "country", "total_scrobbles").dropDuplicates()
 
 
-# =========================================
-# 5. Hechos
-# =========================================
-
+# Tablas de métricas
 fact_artists = (
     artists_raw.join(dim_artist, "artist_key", "left")
     .select(
@@ -129,9 +112,7 @@ fact_albums = (
     )
 )
 
-# =========================================
-# 6. Guardar DW
-# =========================================
+# Guardar los paquetes PARQUET en el HDFS
 dim_artist.write.mode("overwrite").parquet(DW + "artist")
 dim_track.write.mode("overwrite").parquet(DW + "track")
 dim_album.write.mode("overwrite").parquet(DW + "album")
@@ -142,4 +123,3 @@ fact_tracks.write.mode("overwrite").parquet(DW + "fact_tracks")
 fact_albums.write.mode("overwrite").parquet(DW + "fact_albums")
 
 spark.stop()
-print("🎉 DW GENERADO • CERO pérdida de información • SHA256 OK")

@@ -11,7 +11,7 @@ from pyspark.sql import SparkSession
 
 
 
-
+#Cargar tablas
 def load_tables(spark):
     DW = "hdfs://namenode:9000/music_dw/"
 
@@ -393,9 +393,6 @@ def main():
     load_tables(spark)
 
     """ 
-    # =========================================
-    #  SPARK SESSION
-    # =========================================
     spark = SparkSession.builder \
         .appName("Upload Music Results to MySQL") \
         .config("spark.driver.memory", "4g") \
@@ -403,9 +400,7 @@ def main():
         .config("spark.jars", "/opt/jars/mysql-connector-j-8.3.0.jar") \
         .getOrCreate()
 
-    # =========================================
-    #  MYSQL CONNECTION
-    # =========================================
+
     mysql_url = "jdbc:mysql://host.docker.internal:3307/metrics"
     mysql_props = {
         "user": "root",
@@ -421,10 +416,7 @@ def main():
         return spark.read.parquet(path)
 
 
-    # =========================================================
-    # ============= QUERY 7 ===================================
-    # =========================================================
-    print("\n=== QUERY 7: Items Per User ===")
+   #Query 7
     df7 = load_parquet("q7_items_per_user") \
         .select(
             F.col("user_id").cast("int"),
@@ -432,13 +424,10 @@ def main():
         )
 
     df7.write.mode("overwrite").jdbc(mysql_url, "Items_Per_User", properties=mysql_props)
-    print("Items_Per_User")
 
 
-    # =========================================================
-    # ============= QUERY 8 ===================================
-    # =========================================================
-    print("\n=== QUERY 8: Unique Items ===")
+
+    #Query 8
     df8 = load_parquet("q8_unique_items") \
         .select(
             F.col("user_id").cast("int"),
@@ -448,12 +437,9 @@ def main():
         )
 
     df8.write.mode("overwrite").jdbc(mysql_url, "Unique_Items", properties=mysql_props)
-    print("Unique_Items")
 
 
-    # =========================================================
-    # ============= QUERY 9 ARTISTS ===========================
-    # =========================================================
+    #Query 9 - Top3 artistas
     print("\n=== QUERY 9: Duplicated Artists ===")
     df9_art = load_parquet("q9_artists") \
         .withColumn("ranking", F.col("Ranking_triple").cast("int")) \
@@ -466,13 +452,9 @@ def main():
         )
 
     df9_art.write.mode("overwrite").jdbc(mysql_url, "top_10_Duplicated_Artists", properties=mysql_props)
-    print("top_10_Duplicated_Artists")
 
 
-    # =========================================================
-    # ============= QUERY 9 ALBUMS ============================
-    # =========================================================
-    print("\n=== QUERY 9: Duplicated Albums ===")
+    #Query 9 - Top3 Albumes
     df9_alb = load_parquet("q9_albums") \
         .withColumn("ranking", F.col("Ranking_triple").cast("int")) \
         .select(
@@ -484,12 +466,9 @@ def main():
         )
 
     df9_alb.write.mode("overwrite").jdbc(mysql_url, "top_10_Duplicated_Albums", properties=mysql_props)
-    print("top_10_Duplicated_Albums")
 
 
-    # =========================================================
-    # ============= QUERY 9 TRACKS ============================
-    # =========================================================
+    #Query 9 - Top3 tracks
     print("\n=== QUERY 9: Duplicated Tracks ===")
     df9_songs = load_parquet("q9_tracks") \
         .withColumn("ranking", F.col("ranking_triple").cast("int")) \
@@ -505,10 +484,7 @@ def main():
     print("top_10_Duplicated_Songs")
 
 
-    # =========================================================
-    # ============= QUERY 10 ==================================
-    # =========================================================
-    print("\n=== QUERY 10: Loyal Listeners ===")
+    #Query 10 - Loyal listeners
     df10 = load_parquet("q10_loyal_listeners") \
         .select(
             "artist_id",
@@ -516,13 +492,9 @@ def main():
         )
 
     df10.write.mode("overwrite").jdbc(mysql_url, "Loyal_Listeners", properties=mysql_props)
-    print("Loyal_Listeners")
 
 
-    # =========================================================
-    # ============= QUERY 11 (Pairs) ==========================
-    # =========================================================
-    print("\n=== QUERY 11: Paired Artists ===")
+    #Query 11 - Pares de artistas populares
     df11 = load_parquet("top_artist_pairs") \
         .select(
             F.col("ranking").cast("int"),
@@ -532,13 +504,9 @@ def main():
         )
 
     df11.write.mode("overwrite").jdbc(mysql_url, "top_50_Paired_Artists", properties=mysql_props)
-    print("top_50_Paired_Artists")
 
 
-    # =========================================================
-    # ============= QUERY 12 (Trios) ==========================
-    # =========================================================
-    print("\n=== QUERY 12: Trio Artists ===")
+    #Query 12 - Trios de artistas
     df12 = load_parquet("q12_artist_trios") \
         .select(
             F.col("ranking").cast("int"),
@@ -549,10 +517,9 @@ def main():
         )
 
     df12.write.mode("overwrite").jdbc(mysql_url, "top_20_Trio_Artists", properties=mysql_props)
-    print("top_20_Trio_Artists")
 
     """
-   
+   #Insertar promedios, media y desviación estándar
     df_metrics = q_avg_med_std(spark)
     df_metrics.show()
 
@@ -560,6 +527,7 @@ def main():
 
     insert_metrics(spark, query=7, average=row.average, median=row.median,standard_deviation=row.standard_deviation)
 
+    #Insertar cantidad de loyal listeners
     df_loyal_count = q_loyal_listeners(spark)
 
     total_loyal = df_loyal_count.agg(
